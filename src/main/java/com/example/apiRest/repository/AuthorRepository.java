@@ -1,10 +1,9 @@
 package com.example.apiRest.repository;
 
-import java.util.UUID;
-
+import com.example.apiRest.model.Author;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.example.apiRest.model.Author;
+import java.util.UUID;
 
 
 public interface AuthorRepository extends JpaRepository<Author, UUID> {}

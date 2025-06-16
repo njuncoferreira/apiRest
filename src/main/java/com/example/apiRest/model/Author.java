@@ -1,23 +1,24 @@
 package com.example.apiRest.model;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
 
 @Entity
 @Table
 @Getter
 @Setter
+@ToString(exclude = {"books"})
+@EntityListeners(AuditingEntityListener.class)
 public class Author {
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -31,6 +32,17 @@ public class Author {
 	
 	@Column(length = 50, nullable = false)
 	private String nationality;
+	
+	@CreatedDate
+	@Column
+	private LocalDateTime registrationDate;
+	
+	@LastModifiedDate
+	@Column 
+	private LocalDateTime updateDate;
+	
+	@Column
+	private UUID userId;
 	
 	@OneToMany(mappedBy = "author")
 	private List<Book> books;

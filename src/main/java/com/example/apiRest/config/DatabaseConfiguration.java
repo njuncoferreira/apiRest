@@ -1,12 +1,11 @@
 package com.example.apiRest.config;
 
-import javax.sql.DataSource;
-
+import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.zaxxer.hikari.HikariDataSource;
+import javax.sql.DataSource;
 
 @Configuration
 public class DatabaseConfiguration {
