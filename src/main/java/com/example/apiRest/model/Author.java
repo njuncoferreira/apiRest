@@ -44,6 +44,6 @@ public class Author {
 	@Column
 	private UUID userId;
 	
-	@OneToMany(mappedBy = "author")
+	@OneToMany(mappedBy = "author", fetch = FetchType.LAZY)
 	private List<Book> books;
 }

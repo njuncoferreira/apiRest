@@ -30,8 +30,8 @@ public class Book {
 	
 	@Column(precision = 18, scale = 2)
 	private BigDecimal price;
-	
-	@ManyToOne(cascade = CascadeType.ALL)
+
+	@ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
 	@JoinColumn(name = "id_author")
 	private Author author;
 }

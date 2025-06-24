@@ -3,6 +3,7 @@ package com.example.apiRest.controller;
 import com.example.apiRest.dto.AuthorDTO;
 import com.example.apiRest.dto.ErrorResponse;
 import com.example.apiRest.exceptions.DuplicateRecordException;
+import com.example.apiRest.exceptions.NotAllowedException;
 import com.example.apiRest.model.Author;
 import com.example.apiRest.service.AuthorService;
 import org.springframework.http.HttpHeaders;
@@ -107,15 +108,20 @@ public class AuthorController {
 	}
 
 	@DeleteMapping("{id}")
-	public ResponseEntity<Void> delete(@PathVariable("id") String id) {
-		var authorId = UUID.fromString(id);
-		Optional<Author> authorOptional = service.getById(authorId);
+	public ResponseEntity<Object> delete(@PathVariable("id") String id) {
+		try{
+			var authorId = UUID.fromString(id);
+			Optional<Author> authorOptional = service.getById(authorId);
 
-		if(authorOptional.isEmpty()) {
-			return ResponseEntity.notFound().build();
+			if(authorOptional.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
+
+			service.delete(authorOptional.get());
+			return ResponseEntity.noContent().build();
+		} catch (NotAllowedException e) {
+			var error = ErrorResponse.defaultResponse(e.getMessage());
+			return ResponseEntity.status(error.status()).body(error);
 		}
-
-		service.delete(authorOptional.get());
-		return ResponseEntity.noContent().build();
 	}
 }
