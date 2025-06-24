@@ -5,6 +5,9 @@ import com.example.apiRest.model.Author;
 import com.example.apiRest.repository.AuthorRepository;
 import com.example.apiRest.repository.BookRepository;
 import com.example.apiRest.validator.AuthorValidator;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,32 +15,25 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class AuthorService {
-	
 	private final AuthorRepository repository;
 	private final AuthorValidator validator;
 	private final BookRepository bookRepository;
-	
-	public AuthorService(AuthorRepository repository, AuthorValidator validator, BookRepository bookRepository) {
-		this.validator = validator;
-		this.repository = repository;
-		this.bookRepository = bookRepository;
-	}
 
 	public List<Author> search( String name, String nationality) {
-		if(name != null && nationality != null) {
-			return repository.findByNameAndNationality(name, nationality);
-		}
+		var author = new Author();
+		author.setName(name);
+		author.setNationality(nationality);
 
-		if(name != null) {
-			return repository.findByName(name);
-		}
+		ExampleMatcher matcher = ExampleMatcher
+				.matching()
+				.withIgnoreNullValues()
+				.withIgnoreCase()
+				.withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
+		Example<Author> authorExample = Example.of(author, matcher);
 
-		if(nationality != null) {
-			return repository.findByNationality(nationality);
-		}
-
-		return repository.findAll();
+		return repository.findAll(authorExample);
 	}
 
 	public boolean hasBook(Author author) {

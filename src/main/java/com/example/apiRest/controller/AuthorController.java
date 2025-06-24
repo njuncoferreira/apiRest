@@ -6,6 +6,8 @@ import com.example.apiRest.exceptions.DuplicateRecordException;
 import com.example.apiRest.exceptions.NotAllowedException;
 import com.example.apiRest.model.Author;
 import com.example.apiRest.service.AuthorService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +22,10 @@ import java.util.stream.Collectors;
 
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/authors")
 public class AuthorController {
-	
 	private final AuthorService service;
-	
-	public AuthorController(AuthorService service) {
-		this.service = service;
-	}
 
 	@GetMapping
 	public ResponseEntity<List<AuthorDTO>> search(@RequestParam(value = "name", required = false) String name, @RequestParam(value = "nationality", required = false) String nationality){
@@ -62,7 +60,7 @@ public class AuthorController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Object> save(@RequestBody AuthorDTO authorDTO) {
+	public ResponseEntity<Object> save(@RequestBody @Valid AuthorDTO authorDTO) {
 		try {
 			Author authorEntity = authorDTO.AuthorMap();
 			service.save(authorEntity);
@@ -84,7 +82,7 @@ public class AuthorController {
 	}
 
 	@PutMapping("{id}")
-	public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody AuthorDTO dto) {
+	public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody @Valid AuthorDTO dto) {
 		try {
 			var authorId = UUID.fromString(id);
 			Optional<Author> authorOptional = service.getById(authorId);
