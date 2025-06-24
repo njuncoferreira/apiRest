@@ -1,6 +1,8 @@
 package com.example.apiRest.controller;
 
 import com.example.apiRest.dto.AuthorDTO;
+import com.example.apiRest.dto.ErrorResponse;
+import com.example.apiRest.exceptions.DuplicateRecordException;
 import com.example.apiRest.model.Author;
 import com.example.apiRest.service.AuthorService;
 import org.springframework.http.HttpHeaders;
@@ -59,39 +61,49 @@ public class AuthorController {
 	}
 
 	@PostMapping
-	public ResponseEntity<Author> save(@RequestBody AuthorDTO authorDTO) {
-		Author authorEntity = authorDTO.AuthorMap();
-		service.save(authorEntity);
+	public ResponseEntity<Object> save(@RequestBody AuthorDTO authorDTO) {
+		try {
+			Author authorEntity = authorDTO.AuthorMap();
+			service.save(authorEntity);
 
-		URI location = ServletUriComponentsBuilder
-				.fromCurrentRequest()
-				.path("/{id}")
-				.buildAndExpand(authorEntity.getId())
-				.toUri();
+			URI location = ServletUriComponentsBuilder
+					.fromCurrentRequest()
+					.path("/{id}")
+					.buildAndExpand(authorEntity.getId())
+					.toUri();
 
-		HttpHeaders headers = new HttpHeaders();
-		headers.setLocation(location);
+			HttpHeaders headers = new HttpHeaders();
+			headers.setLocation(location);
 
-		return new ResponseEntity<Author>(authorEntity, headers, HttpStatus.CREATED);
+			return new ResponseEntity<Object>(authorEntity, headers, HttpStatus.CREATED);
+		} catch (DuplicateRecordException error) {
+			var errorDTO = ErrorResponse.conflict(error.getMessage());
+			return ResponseEntity.status(errorDTO.status()).body(errorDTO);
+		}
 	}
 
 	@PutMapping("{id}")
-	public ResponseEntity<Void> update(@PathVariable("id") String id, @RequestBody AuthorDTO dto) {
-		var authorId = UUID.fromString(id);
-		Optional<Author> authorOptional = service.getById(authorId);
+	public ResponseEntity<Object> update(@PathVariable("id") String id, @RequestBody AuthorDTO dto) {
+		try {
+			var authorId = UUID.fromString(id);
+			Optional<Author> authorOptional = service.getById(authorId);
 
-		if(authorOptional.isEmpty()) {
-			return ResponseEntity.notFound().build();
+			if (authorOptional.isEmpty()) {
+				return ResponseEntity.notFound().build();
+			}
+
+			var author = authorOptional.get();
+			author.setName(dto.name());
+			author.setNationality(dto.nationality());
+			author.setAnniversaryDate(dto.anniversaryDate());
+
+			service.update(author);
+
+			return ResponseEntity.noContent().build();
+		} catch (DuplicateRecordException error) {
+			var errorDTO = ErrorResponse.conflict(error.getMessage());
+			return ResponseEntity.status(errorDTO.status()).body(errorDTO);
 		}
-
-		var author = authorOptional.get();
-		author.setName(dto.name());
-		author.setNationality(dto.nationality());
-		author.setAnniversaryDate(dto.anniversaryDate());
-
-		service.update(author);
-
-		return ResponseEntity.noContent().build();
 	}
 
 	@DeleteMapping("{id}")
